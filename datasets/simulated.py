@@ -1,6 +1,5 @@
-import numpy as np
-
 from benchopt import BaseDataset
+from benchopt.datasets import make_correlated_data
 
 
 class Dataset(BaseDataset):
@@ -12,24 +11,20 @@ class Dataset(BaseDataset):
     parameters = {
         'n_samples, n_features': [
             (1000, 500),
-            (5000, 200)]
+            (5000, 200)
+        ],
+        'rho': [0, 0.6],
+        'random_state': [27]
     }
-
-    def __init__(self, n_samples=10, n_features=50, random_state=27):
-        # Store the parameters of the dataset
-        self.n_samples = n_samples
-        self.n_features = n_features
-        self.random_state = random_state
 
     def get_data(self):
 
-        rng = np.random.RandomState(self.random_state)
-        X = rng.randn(self.n_samples, self.n_features)
-        y = rng.randn(self.n_samples)
+        X, y, _ = make_correlated_data(
+            self.n_samples, self.n_features, rho=self.rho,
+            random_state=self.random_state
+        )
 
         # `data` holds the keyword arguments for the `set_data` method of the
         # objective.
         # They are customizable.
-        data = dict(X=X, y=y)
-
-        return self.n_features, data
+        return dict(X=X, y=y > 0)
