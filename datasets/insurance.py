@@ -46,7 +46,6 @@ class Dataset(BaseDataset):
         w = df["Exposure"]
         X = linear_model_preprocessor.fit_transform(df)
         y = df["Frequency"].values
-        y = (y > np.quantile(y, q=0.95)).astype(np.float64)
 
         X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(
             X, y, w, train_size=5_000, test_size=10_000, random_state=0

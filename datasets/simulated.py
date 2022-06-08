@@ -24,12 +24,17 @@ class Dataset(BaseDataset):
 
     def get_data(self):
 
+        rng = np.random.RandomState(self.random_state)
+
         X, y, _ = make_correlated_data(
             self.n_samples, self.n_features, rho=self.rho,
-            random_state=self.random_state
+            random_state=rng
         )
 
-        y = (y > np.quantile(y, q=0.95)).astype(np.float64)
+        # Generate poisson variables
+        mu = np.exp(y)
+        y = rng.poisson(mu).astype(np.float64)
+
         w = np.full_like(y, fill_value=(1.0 / y.shape[0]))
 
         X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(

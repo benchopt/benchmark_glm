@@ -3,6 +3,7 @@ from benchopt import BaseObjective, safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
 
+    from sklearn._loss import HalfPoissonLoss
     from sklearn._loss import HalfBinomialLoss
     from sklearn.linear_model._linear_loss import LinearModelLoss
 
@@ -21,9 +22,9 @@ class Objective(BaseObjective):
     ]
 
     parameters = {
-        'datafit': ['l2'],
-        'penalty': ['l2'],
-        'reg': [0.1]
+        'datafit': ['poisson', 'binom'],
+        'reg': [1e-4, 1e-12],
+        'fit_intercept': [True, False]
     }
 
     def get_one_solution(self):
@@ -35,9 +36,19 @@ class Objective(BaseObjective):
         # They are customizable.
         self.X_train, self.y_train, self.w_train = X_train, y_train, w_train
         self.X_test, self.y_test, self.w_test = X_test, y_test, w_test
-        self.lml = LinearModelLoss(
-            base_loss=HalfBinomialLoss(), fit_intercept=False
-        )
+
+        if self.datafit == "binom":
+            y_thresh = np.quantile(y_train, q=0.95)
+            y_train = (y_train > y_thresh).astype(np.float64)
+            y_test = (y_test > y_thresh).astype(np.float64)
+
+            self.lml = LinearModelLoss(
+                base_loss=HalfBinomialLoss(), fit_intercept=self.fit_intercept
+            )
+        elif self.datafit == "poisson":
+            self.lml = LinearModelLoss(
+                base_loss=HalfPoissonLoss(), fit_intercept=self.fit_intercept
+            )
 
     def compute(self, beta):
         # The arguments of this function are the outputs of the
@@ -61,5 +72,7 @@ class Objective(BaseObjective):
         # for the `set_objective` method of the solver.
         # They are customizable.
         return dict(
-            X=self.X_train, y=self.y_train, w=self.w_train, reg=self.reg
+            X=self.X_train, y=self.y_train, w=self.w_train,
+            datafit=self.datafit, reg=self.reg,
+            fit_intercept=self.fit_intercept
         )
