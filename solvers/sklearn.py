@@ -32,14 +32,15 @@ class Solver(BaseSolver):
 
     # any parameter defined here is accessible as a class attribute
     parameters = {'solver': [
-        'lbfgs2', 'lbfgs', 'newton-cg', 'newton-cholesky'
+        'lbfgs', 'lbfgs2', 'newton-cg', 'newton-cholesky'
     ]}
 
     stopping_criterion = SufficientProgressCriterion(
         patience=3, strategy='iteration'
     )
 
-    def get_next(self, stop_val):
+    @staticmethod
+    def get_next(stop_val):
         return int(max(stop_val + 1, stop_val * 1.3))
 
     def skip(self, X, y, w, datafit, reg, fit_intercept=False):
@@ -81,7 +82,7 @@ class Solver(BaseSolver):
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ConvergenceWarning)
-            self.clf.fit(self.X, self.y)
+            self.clf.fit(self.X, self.y, sample_weight=self.w)
         self.coef_ = self.clf.coef_.flatten()
 
         if self.fit_intercept:
