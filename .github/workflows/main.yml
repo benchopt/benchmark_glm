@@ -16,7 +16,7 @@ on:
 
 jobs:
   test-benchmark:
-    uses: benchopt/benchopt/.github/workflows/test_benchmark.yml@MTN_reusable_workflow
+    uses: tommoral/benchopt/.github/workflows/test_benchmark.yml@MTN_reusable_workflow
     with:
-      benchopt_branch: benchopt:MTN_reusable_workflow
+      benchopt_branch: tommoral:MTN_reusable_workflow
 
