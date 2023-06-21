@@ -43,12 +43,12 @@ class Dataset(BaseDataset):
             ],
             remainder="drop",
         )
-        w = df["Exposure"]
+        w = df["Exposure"].values
         X = linear_model_preprocessor.fit_transform(df)
         y = df["Frequency"].values
 
         X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(
-            X, y, w, train_size=5_000, test_size=10_000, random_state=0
+            X, y, w, test_size=10_000, random_state=0
         )
         return dict(
             X_train=X_train, y_train=y_train, w_train=w_train,

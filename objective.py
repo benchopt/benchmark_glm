@@ -18,13 +18,12 @@ class Objective(BaseObjective):
     install_cmd = "conda"
     requirements = [
         'pip:git+https://github.com/lorentzenchr/'
-        'scikit-learn@glm_newton_cholesky'
+        'scikit-learn@glm_newton_lsmr_only'
     ]
 
     parameters = {
         'datafit': ['poisson', 'binom'],
-        'reg': [1e-4, 1e-12],
-        'fit_intercept': [True, False]
+        'reg': [1e-4, 1e-12]
     }
 
     def get_one_solution(self):
@@ -39,15 +38,15 @@ class Objective(BaseObjective):
 
         if self.datafit == "binom":
             y_thresh = np.quantile(y_train, q=0.95)
-            y_train = (y_train > y_thresh).astype(np.float64)
-            y_test = (y_test > y_thresh).astype(np.float64)
+            self.y_train = (y_train > y_thresh).astype(np.float64)
+            self.y_test = (y_test > y_thresh).astype(np.float64)
 
             self.lml = LinearModelLoss(
-                base_loss=HalfBinomialLoss(), fit_intercept=self.fit_intercept
+                base_loss=HalfBinomialLoss(), fit_intercept=True
             )
         elif self.datafit == "poisson":
             self.lml = LinearModelLoss(
-                base_loss=HalfPoissonLoss(), fit_intercept=self.fit_intercept
+                base_loss=HalfPoissonLoss(), fit_intercept=True
             )
 
     def compute(self, beta):
@@ -67,7 +66,7 @@ class Objective(BaseObjective):
         )
         return dict(value=train_loss, test_loss=test_loss)
 
-    def to_dict(self):
+    def get_objective(self):
         # The output of this function are the keyword arguments
         # for the `set_objective` method of the solver.
         # They are customizable.

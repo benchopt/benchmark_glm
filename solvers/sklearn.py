@@ -27,12 +27,12 @@ class Solver(BaseSolver):
     install_cmd = "conda"
     requirements = [
         'pip:git+https://github.com/lorentzenchr/'
-        'scikit-learn@glm_newton_cholesky'
+        'scikit-learn@glm_newton_lsmr_only'
     ]
 
     # any parameter defined here is accessible as a class attribute
     parameters = {'solver': [
-        'lbfgs2', 'lbfgs', 'newton-cg', 'newton-cholesky'
+        'newton-lsmr', 'lbfgs', 'newton-cg', 'newton-cholesky'
     ]}
 
     stopping_criterion = SufficientProgressCriterion(
@@ -43,7 +43,7 @@ class Solver(BaseSolver):
         return int(max(stop_val + 1, stop_val * 1.3))
 
     def skip(self, X, y, w, datafit, reg, fit_intercept=False):
-        if datafit == "poisson" and self.solver in ["lbfgs2", "newton-cg"]:
+        if datafit == "poisson" and self.solver in ["newton-cg"]:
             return True, "solvers only compared for binom datafit"
         return False, None
 
@@ -55,17 +55,10 @@ class Solver(BaseSolver):
         self.fit_intercept = fit_intercept
 
         if datafit == "binom":
-            if self.solver in ['lbfgs', 'newton-cg']:
-                self.clf = LogisticRegression(
-                    C=2 / reg / X.shape[0], solver=self.solver, tol=1e-16,
-                    fit_intercept=fit_intercept
-                )
-            else:
-                solver = self.solver.replace('2', '')
-                self.clf = BinomialRegressor(
-                    solver=solver, alpha=reg, tol=1e-16, max_iter=1,
-                    fit_intercept=fit_intercept
-                )
+            self.clf = LogisticRegression(
+                C=2 / reg / X.shape[0], solver=self.solver, tol=1e-16,
+                fit_intercept=fit_intercept
+            )
         else:
             self.clf = PoissonRegressor(
                 solver=self.solver, alpha=reg, tol=1e-16, max_iter=1,
