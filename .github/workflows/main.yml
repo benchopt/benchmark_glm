@@ -15,8 +15,13 @@ on:
     - cron:  '42 7 * * *'
 
 jobs:
-  test-benchmark:
-    uses: tommoral/benchopt/.github/workflows/test_benchmark.yml@MTN_reusable_workflow
+  benchopt_dev:
+    uses: benchopt/template_benchmark/.github/workflows/test_benchmarks.yml@main
     with:
-      benchopt_branch: tommoral:MTN_reusable_workflow
-
+      benchopt_branch: benchopt@main
+  benchopt_release:
+    uses: benchopt/template_benchmark/.github/workflows/test_benchmarks.yml@main
+    with:
+      benchopt_version: latest
+  lint:
+    uses: benchopt/template_benchmark/.github/workflows/lint_benchmarks.yml@main
