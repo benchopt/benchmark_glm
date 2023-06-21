@@ -42,32 +42,31 @@ class Solver(BaseSolver):
     def get_next(self, stop_val):
         return int(max(stop_val + 1, stop_val * 1.3))
 
-    def skip(self, X, y, w, datafit, reg, fit_intercept=False):
+    def skip(self, X, y, w, datafit, reg):
         if datafit == "poisson" and self.solver in ["newton-cg"]:
             return True, "solvers only compared for binom datafit"
         return False, None
 
-    def set_objective(self, X, y, w, datafit, reg, fit_intercept=False):
+    def set_objective(self, X, y, w, datafit, reg):
         # The arguments of this function are the results of the
         # `to_dict` method of the objective.
         # They are customizable.
         self.X, self.y, self.w = X, y, w
-        self.fit_intercept = fit_intercept
 
         if datafit == "binom":
             self.clf = LogisticRegression(
                 C=2 / reg / X.shape[0], solver=self.solver, tol=1e-16,
-                fit_intercept=fit_intercept
+                fit_intercept=True
             )
         else:
             self.clf = PoissonRegressor(
                 solver=self.solver, alpha=reg, tol=1e-16, max_iter=1,
-                fit_intercept=fit_intercept
+                fit_intercept=True
             )
 
     def run(self, n_iter):
         if n_iter == 0:
-            self.coef_ = np.zeros(self.X.shape[1] + self.fit_intercept)
+            self.coef_ = np.zeros(self.X.shape[1] + 1)
             return
 
         self.clf.set_params(max_iter=n_iter)
@@ -75,10 +74,8 @@ class Solver(BaseSolver):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ConvergenceWarning)
             self.clf.fit(self.X, self.y)
-        self.coef_ = self.clf.coef_.flatten()
 
-        if self.fit_intercept:
-            self.coef_ = np.r_[self.coef_, self.clf.intercept_]
+        self.coef_ = np.r_[self.clf.coef_.flatten(), self.clf.intercept_]
 
     def get_result(self):
         # The outputs of this function are the arguments of the

@@ -72,6 +72,5 @@ class Objective(BaseObjective):
         # They are customizable.
         return dict(
             X=self.X_train, y=self.y_train, w=self.w_train,
-            datafit=self.datafit, reg=self.reg,
-            fit_intercept=self.fit_intercept
+            datafit=self.datafit, reg=self.reg
         )
