@@ -22,12 +22,12 @@ class Objective(BaseObjective):
     ]
 
     parameters = {
-        'datafit': ['poisson', 'binom'],
+        'datafit': ['binom', 'poisson'],
         'reg': [1e-4, 1e-12]
     }
 
     def get_one_solution(self):
-        return np.zeros(self.X.shape[1])
+        return np.zeros(self.X_train.shape[1] + self.fit_intercept)
 
     def set_data(self, X_train, y_train, w_train, X_test, y_test, w_test):
         # The keyword arguments of this function are the keys of the `data`
@@ -56,7 +56,8 @@ class Objective(BaseObjective):
         train_loss = self.lml.loss(
             coef=beta,
             X=self.X_train, y=self.y_train.astype(np.float64),
-            sample_weight=self.w_train, l2_reg_strength=self.reg,
+            sample_weight=self.w_train,
+            l2_reg_strength=self.reg,
         )
         test_loss = self.lml.loss(
             coef=beta,
