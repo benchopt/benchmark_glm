@@ -82,4 +82,4 @@ class Solver(BaseSolver):
         # The outputs of this function are the arguments of the
         # `compute` method of the objective.
         # They are customizable.
-        return self.coef_
+        return dict(beta=self.coef_)

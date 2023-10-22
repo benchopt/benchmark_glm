@@ -26,8 +26,8 @@ class Objective(BaseObjective):
         'reg': [1e-4, 1e-12]
     }
 
-    def get_one_solution(self):
-        return np.zeros(self.X_train.shape[1] + self.fit_intercept)
+    def get_one_result(self):
+        return dict(beta=np.zeros(self.X_train.shape[1] + 1))
 
     def set_data(self, X_train, y_train, w_train, X_test, y_test, w_test):
         # The keyword arguments of this function are the keys of the `data`
@@ -49,7 +49,7 @@ class Objective(BaseObjective):
                 base_loss=HalfPoissonLoss(), fit_intercept=True
             )
 
-    def compute(self, beta):
+    def evaluate_result(self, beta):
         # The arguments of this function are the outputs of the
         # `get_result` method of the solver.
         # They are customizable.
