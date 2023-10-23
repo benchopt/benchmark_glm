@@ -18,17 +18,16 @@ class Objective(BaseObjective):
     install_cmd = "conda"
     requirements = [
         'pip:git+https://github.com/lorentzenchr/'
-        'scikit-learn@glm_newton_cholesky'
+        'scikit-learn@glm_newton_lsmr_only'
     ]
 
     parameters = {
         'datafit': ['binom', 'poisson'],
-        'reg': [1e-4, 1e-12],
-        'fit_intercept': [True, False]
+        'reg': [1e-4, 1e-12]
     }
 
-    def get_one_solution(self):
-        return np.zeros(self.X_train.shape[1] + self.fit_intercept)
+    def get_one_result(self):
+        return dict(beta=np.zeros(self.X_train.shape[1] + 1))
 
     def set_data(self, X_train, y_train, w_train, X_test, y_test, w_test):
         # The keyword arguments of this function are the keys of the `data`
@@ -43,14 +42,14 @@ class Objective(BaseObjective):
             self.y_test = (y_test > y_thresh).astype(np.float64)
 
             self.lml = LinearModelLoss(
-                base_loss=HalfBinomialLoss(), fit_intercept=self.fit_intercept
+                base_loss=HalfBinomialLoss(), fit_intercept=True
             )
         elif self.datafit == "poisson":
             self.lml = LinearModelLoss(
-                base_loss=HalfPoissonLoss(), fit_intercept=self.fit_intercept
+                base_loss=HalfPoissonLoss(), fit_intercept=True
             )
 
-    def compute(self, beta):
+    def evaluate_result(self, beta):
         # The arguments of this function are the outputs of the
         # `get_result` method of the solver.
         # They are customizable.
@@ -68,12 +67,11 @@ class Objective(BaseObjective):
         )
         return dict(value=train_loss, test_loss=test_loss)
 
-    def to_dict(self):
+    def get_objective(self):
         # The output of this function are the keyword arguments
         # for the `set_objective` method of the solver.
         # They are customizable.
         return dict(
             X=self.X_train, y=self.y_train, w=self.w_train,
-            datafit=self.datafit, reg=self.reg,
-            fit_intercept=self.fit_intercept
+            datafit=self.datafit, reg=self.reg
         )
