@@ -1,20 +1,15 @@
-My Benchopt Benchmark
-=====================
+Benchmark for Generalized Linear Models (GLM)
+=============================================
 |Build Status| |Python 3.6+|
 
 Benchopt is a package to simplify and make more transparent and
 reproducible the comparisons of optimization algorithms.
-This benchmark is dedicated to solver of **describe your problem**:
+The GLM consists in solving the following program:
 
-.. math::
+$\\min_{w} f(W^\\top X, y) + \\lambda R(w)$
 
-    \min_{w} f(X, w)
-
-where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
-
-.. math::
-
- X = [x_1^\top, \dots, x_n^\top]^\top \in \mathbb{R}^{n \times p}
+where $f$ is a link function, defined by the distribution of the target variables,
+and $R$ is a regularisation function -- typically the $\\ell_1$ or $\\ell_2$ norm.
 
 Install
 --------
